@@ -5,11 +5,18 @@
 		.map {
 			height:400px;
 		}
+		.answer {
+			font-weight:bold;
+		}
 	</style>
 </head>
 
 <body>
 	<div id="gmap" class="map"></div>
+	<div>
+		<p>Your route: <span id="yourroute" class="answer"></span></p>
+		<p>Best route: <span id="bestroute" class="answer"></span></p>
+	</div>
 
 	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script>
@@ -20,7 +27,8 @@
 		    var g = this.lng() * ra - a.lng() * ra; 
 		    var f = 2 * e.asin(e.sqrt(e.pow(e.sin(d/2), 2) + e.cos(b) * e.cos 
 		    (c) * e.pow(e.sin(g/2), 2))); 
-		    return f * 6378.137; 
+		    var ret = f * 6378.137; 
+		    return(Math.floor(ret));
 		}
 
 		google.maps.Polyline.prototype.inKm = function(n){ 
@@ -138,6 +146,7 @@
 				strokeWeight: 2
 			});
 			flightPath.setMap(map);
+			document.getElementById('yourroute').innerHTML = flightPath.inKm() + 'km';
 			//console.log("Distance travelled: ",flightPath.inKm());
         }
 
@@ -169,6 +178,7 @@
 				strokeWeight: 8
 			});
 			solutionFlightPath.setMap(map);
+			document.getElementById('bestroute').innerHTML = solutionFlightPath.inKm() + 'km';
 			//console.log("Distance travelled: ",solutionFlightPath.inKm());        	
         }
 
