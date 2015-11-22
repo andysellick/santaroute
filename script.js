@@ -18,22 +18,61 @@ google.maps.Polyline.prototype.inKm = function(n){
 
 
 var snowman = {
+	markercount: 0,
+	markers: [],
+	markerslinked: 0,
+	markerstotal: 0,
+
 	general: {
+		//set everything up
 		init: function(){
-			snowman.map.generateLocations(5);
+			snowman.map.generateLocations();
 			snowman.map.generateMap();
-			snowman.map.addMarkers();
-			
+
+			snowman.game.populateDialog(introtxt);
 			snowman.game.initClickEvents();
 		}
 	},
 
 	game: {
+		//fill the dialog with text and show it
+		populateDialog: function(txt){
+			$('#dialog').html(txt)
+			$('#dialogwrap').fadeIn();
+		},
 		initClickEvents: function(){
-			document.getElementById('showbest').onclick = function(e){
+			//start the game
+			$('body').on('click','#begingame',function(e){
+				e.preventDefault();
+				$('#dialogwrap').fadeOut(function(){
+					$('#dialog').html('');
+				});
+				snowman.game.nextLevel();
+			});
+			//show calculated solution route
+			$('body').on('click','#showbest',function(e){
+				e.preventDefault();
 			    snowman.game.calculateSolution();
-				return false;
-			}
+			});
+			$('body').on('click','#nextlevel',function(e){
+				e.preventDefault();
+				snowman.game.nextLevel();
+			});
+		},
+
+		//reset all the markers, recreate and move to next level
+		nextLevel: function(){
+			console.log('next level');
+			//clear all markers
+			snowman.map.removeMarkers();
+			snowman.markers = [];
+			snowman.markers.length = 0;
+			//increment potential marker count by 1
+			snowman.markercount++;
+			snowman.map.generateLocations();
+			//add markers to map
+			snowman.map.addMarkers();
+			console.log(snowman.markercount,snowman.markers.length,snowman.markers);
 		},
 
 		//draw a line only between markers that have not got a line drawn to them yet
@@ -103,8 +142,8 @@ var snowman = {
 		//initialise the map
 		generateMap: function(){
 			map = new google.maps.Map(document.getElementById('gmap'), {
-			    center: {lat: 0, lng: 0},
-			    zoom: 8,
+			    center: {lat: globalmapdata[0]['lat'], lng: globalmapdata[0]['lng']},
+			    zoom: 4,
 				zoomControl: true,
 				mapTypeControl: false,
 				scaleControl: false,
@@ -112,7 +151,6 @@ var snowman = {
 				rotateControl: false
 			});
 			bounds = new google.maps.LatLngBounds(null);
-			//var infowindow = new google.maps.InfoWindow();
 		},
 		addMarkers: function(){
 			//get markers from data and insert
@@ -124,7 +162,7 @@ var snowman = {
 			        state: 0,
 			        type: globalmapdata[i].type || 0
 			    });
-			    markers.push(marker);
+			    snowman.markers.push(marker);
 			    bounds.extend(marker.position);
 		
 			    var content = globalmapdata[i].content;
@@ -137,7 +175,7 @@ var snowman = {
 							var longitude = this.position.lng();
 							if(this.state){ //state is true if this is part of the route
 								this.state = 0;
-							}                  
+							}
 							else {
 								this.state = 1;
 							}  
@@ -148,9 +186,17 @@ var snowman = {
 			}
 			setTimeout(function() {map.fitBounds(bounds)},1); //fit map around markers
 		},
+		removeMarkers: function(){
+		    for(var i = 0; i < snowman.markers.length; i++){
+		        snowman.markers[i].setMap(null);
+		    }
+		},
 		//create random locations around the world
-		generateLocations: function(limit){
-			for(var g = 0; g < limit; g++){
+		generateLocations: function(){
+			globalmapdata = [];
+			globalmapdata.length = 0;
+			globalmapdata.push(origin);
+			for(var g = 0; g < snowman.markercount; g++){
 				var randlat = Math.floor(Math.random() * (latmax * 2)) - latmax;
 				var randlng = Math.floor(Math.random() * (lngmax * 2)) - lngmax;
 				globalmapdata.push({"lat":randlat,"lng":randlng,"content": "here is " + randlat + ',' + randlng});
@@ -185,22 +231,18 @@ var snowman = {
 	}
 }
 
-var globalmapdata = [
-	{
-		"lat": 71,
-		"lng": -42.3,
-		"content": "1",
-		"type": "start"
-	}
-];
+var origin = {
+	"lat": 71,
+	"lng": -42.3,
+	"content": "1",
+	"type": "start"
+}
 
+var globalmapdata = [];
 var map;
 var bounds;
-var markers = [];
 var latmax = 58;
 var lngmax = 180;
-
-snowman.general.init();
 
 var lines = [];
 var pointsclicked = [];
@@ -208,12 +250,18 @@ var flightPath;
 
 //initial setup - store the origin point
 pointsclicked.push(0);
-lines.push({lat: globalmapdata[0].lat, lng: globalmapdata[0].lng, id: globalmapdata[0].id});
+lines.push({lat: origin.lat, lng: origin.lng, id: origin.id});
 
 //calculate the optimal route
 solutionPoints = [0];
 solutionFlightPath = [];
 
+var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Ordering Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn">Instructions</a></p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a></p>';
+
+
+$(document).ready(function(){
+	snowman.general.init();
+});
 
 
 

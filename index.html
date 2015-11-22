@@ -8,15 +8,23 @@
 <body>
 	<div id="gmap" class="map"></div>
 	<div class="overlay controls">
-		<p>Your route: <span id="yourroute" class="answer"></span></p>
-		<button id="showbest">Show best route</button>
+		<p><span id="markerslinked">X</span> of <span id="markerstotal">Y</span> waypoints connected</p>
+		<button id="showbest" class="btn">Show best route</button>
 		<div>
+			<p>Your route: <span id="yourroute" class="answer"></span></p>
 			<p>Best route: <span id="bestroute" class="answer"></span></p>
 		</div>
+		<button id="nextlevel" class="btn">Next level</button>
 	</div>
 	<div class="overlay score">
+		Score <span id="yourscore">0</span>
+	</div>
+	
+	<div class="dialogwrap" id="dialogwrap">
+		<div class="dialog" id="dialog"></div>
 	</div>
 
+	<script src="jquery-1.11.3.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script src="script.js"></script>
 </body>
