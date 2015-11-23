@@ -15,6 +15,11 @@ google.maps.Polyline.prototype.inKm = function(n){
     }
     return dist;
 }		
+// Define a symbol using a predefined path (an arrow)
+// supplied by the Google Maps JavaScript API.
+var lineSymbol = {
+	path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+};
 
 
 var snowman = {
@@ -22,15 +27,28 @@ var snowman = {
 	markers: [],
 	markerslinked: 0,
 	markerstotal: 0,
+	icon_no: 'img/marker-red.svg',
+	icon_ok: 'img/marker-green.svg',
+	lines: [],
+	pointsclicked: [],
+	flightPath: 0,
+	solutionPoints: [0],
+	solutionFlightPath: 0,
 
 	general: {
 		//set everything up
 		init: function(){
+			snowman.general.initBasics();
 			snowman.map.generateLocations();
 			snowman.map.generateMap();
 
 			snowman.game.populateDialog(introtxt);
 			snowman.game.initClickEvents();
+		},
+		//initial setup - store the origin point
+		initBasics: function(){
+			snowman.pointsclicked.push(0);
+			snowman.lines.push({lat: origin.lat, lng: origin.lng, id: origin.id});
 		}
 	},
 
@@ -62,52 +80,71 @@ var snowman = {
 
 		//reset all the markers, recreate and move to next level
 		nextLevel: function(){
-			console.log('next level');
+			//console.log('next level');
 			//clear all markers
 			snowman.map.removeMarkers();
 			snowman.markers = [];
 			snowman.markers.length = 0;
 			//increment potential marker count by 1
 			snowman.markercount++;
+			snowman.lines = [];
+			snowman.pointsclicked = [];
+			//clear polylines
+			if(snowman.flightPath){
+				snowman.flightPath.setMap(null);
+				snowman.flightPath = 0;
+			}
+			if(snowman.solutionFlightPath){
+				snowman.solutionPoints = [0];
+				snowman.solutionFlightPath.setMap(null);
+				snowman.solutionFlightPath = 0;
+			}
+			snowman.markerslinked = 0;
+			snowman.markerstotal = 0;
+			snowman.general.initBasics();
 			snowman.map.generateLocations();
 			//add markers to map
 			snowman.map.addMarkers();
-			console.log(snowman.markercount,snowman.markers.length,snowman.markers);
+			//console.log(snowman.markercount,snowman.markers.length,snowman.markers);
 		},
 
 		//draw a line only between markers that have not got a line drawn to them yet
 		drawLine: function(x,y,id,state){
 			//console.log(x,y,id,state,lines);
-			var inarr = pointsclicked.indexOf(id);
+			var inarr = snowman.pointsclicked.indexOf(id);
 			if(state){ //add the line to the route
 		    	if(inarr == -1){ //check to see if we already clicked on this point
-		    		pointsclicked.push(id); //push it
-		        	lines.push({lat: x, lng: y, id: id});	
+		    		snowman.pointsclicked.push(id); //push it
+		        	snowman.lines.push({lat: x, lng: y, id: id});	
 				}
 			}
 			else { //remove the line from the route
-				pointsclicked.splice(inarr, 1);
-				for(var z = 0; z < lines.length; z++){
-					if(lines[z].id == id){
-						lines.splice(z,1);
+				snowman.pointsclicked.splice(inarr, 1);
+				for(var z = 0; z < snowman.lines.length; z++){
+					if(snowman.lines[z].id == id){
+						snowman.lines.splice(z,1);
 						break;
 					}
 				}
 			}
-			//console.log(lines);
-			if(flightPath){
-				flightPath.setMap(null);
+			//console.log(snowman.lines);
+			if(snowman.flightPath){
+				snowman.flightPath.setMap(null);
 			}
-			flightPath = new google.maps.Polyline({
-				path: lines,
+			snowman.flightPath = new google.maps.Polyline({
+				path: snowman.lines,
 				geodesic: true,
 				strokeColor: '#FF0000',
 				strokeOpacity: 1.0,
-				strokeWeight: 2
+				strokeWeight: 2,
+				icons: [{
+					icon: lineSymbol,
+					offset: '100%'
+				}]
 			});
-			flightPath.setMap(map);
-			document.getElementById('yourroute').innerHTML = flightPath.inKm() + 'km';
-			//console.log("Distance travelled: ",flightPath.inKm());
+			snowman.flightPath.setMap(map);
+			document.getElementById('yourroute').innerHTML = snowman.flightPath.inKm() + 'km';
+			//console.log("Distance travelled: ",snowman.flightPath.inKm());
 		},
 		//fairly simple - basically find the next nearest marker to where we started from
 		calculateSolution: function(){
@@ -115,25 +152,25 @@ var snowman = {
 		
 			for(var x = 1; x < globalmapdata.length; x++){
 				pos = snowman.map.find_closest_marker(globalmapdata[pos].lat,globalmapdata[pos].lng,x);
-				solutionPoints.push(pos);
+				snowman.solutionPoints.push(pos);
 			}
 			//console.log(solutionPoints);
 			var solutionLines = [];
 			//convert data references to their actual lat/lng positions
-			for(var x = 0; x < solutionPoints.length; x++){
-				var curr = solutionPoints[x];
+			for(var x = 0; x < snowman.solutionPoints.length; x++){
+				var curr = snowman.solutionPoints[x];
 				solutionLines.push({lat: globalmapdata[curr].lat, lng: globalmapdata[curr].lng});
 			}
-			solutionFlightPath = new google.maps.Polyline({
+			snowman.solutionFlightPath = new google.maps.Polyline({
 				path: solutionLines,
 				geodesic: true,
 				strokeColor: '#00FF00',
 				strokeOpacity: 0.5,
 				strokeWeight: 8
 			});
-			solutionFlightPath.setMap(map);
-			document.getElementById('bestroute').innerHTML = solutionFlightPath.inKm() + 'km';
-			//console.log("Distance travelled: ",solutionFlightPath.inKm());        	
+			snowman.solutionFlightPath.setMap(map);
+			document.getElementById('bestroute').innerHTML = snowman.solutionFlightPath.inKm() + 'km';
+			//console.log("Distance travelled: ",snowman.solutionFlightPath.inKm());
 		}
 
 	},
@@ -160,8 +197,12 @@ var snowman = {
 			        map: map,
 			        id: "marker" + i,
 			        state: 0,
+			        icon: snowman.icon_no,
 			        type: globalmapdata[i].type || 0
-			    });
+			    })
+			    if(i == 0){ //set the first, static point to a different icon
+					marker.setIcon(snowman.icon_ok);
+				}
 			    snowman.markers.push(marker);
 			    bounds.extend(marker.position);
 		
@@ -175,10 +216,12 @@ var snowman = {
 							var longitude = this.position.lng();
 							if(this.state){ //state is true if this is part of the route
 								this.state = 0;
+								this.setIcon(snowman.icon_no);
 							}
 							else {
 								this.state = 1;
-							}  
+								this.setIcon(snowman.icon_ok);
+							}
 				        	snowman.game.drawLine(latitude,longitude,this.id,this.state);
 				        }
 			        };
@@ -211,7 +254,7 @@ var snowman = {
 		    var distances = [];
 		    var closest = -1;
 		    for(i=0; i<globalmapdata.length; i++){
-		    	if(solutionPoints.indexOf(i) == -1){
+		    	if(snowman.solutionPoints.indexOf(i) == -1){
 			        var mlat = globalmapdata[i].lat;
 			        var mlng = globalmapdata[i].lng;
 			        var dLat  = snowman.map.rad(mlat - lat);
@@ -244,17 +287,7 @@ var bounds;
 var latmax = 58;
 var lngmax = 180;
 
-var lines = [];
-var pointsclicked = [];
-var flightPath;
 
-//initial setup - store the origin point
-pointsclicked.push(0);
-lines.push({lat: origin.lat, lng: origin.lng, id: origin.id});
-
-//calculate the optimal route
-solutionPoints = [0];
-solutionFlightPath = [];
 
 var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Ordering Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn">Instructions</a></p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a></p>';
 
