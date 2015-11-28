@@ -289,7 +289,7 @@ var lngmax = 180;
 
 
 
-var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Ordering Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn">Instructions</a></p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a></p>';
+var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn">Instructions</a></p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a></p>';
 
 
 $(document).ready(function(){
