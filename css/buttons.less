@@ -1,0 +1,87 @@
+/* --buttons */
+    /* button variables */
+    @btnhorzpadding: 1em; /* left and right padding for buttons */
+    @btnfontsize: 1.2em; /* button font size */
+    @btnlineheight: 2em; /* used to control the vertical padding of buttons, should therefore be larger than btnfontsize */
+
+    /* almost! managed to normalise the heights across IEs, FF and everyone else */
+    input.btn {
+        padding-top:0;
+        padding-bottom:0;
+        height:@btnlineheight * 1.04;
+        &.btn-small {
+            height:@btnlineheight / 1.4;
+        }
+    }
+    /* Remove button padding in FF - otherwise all buttons are 2px taller than links with the same style */
+    input::-moz-focus-inner,
+    button::-moz-focus-inner {
+        border:0;
+        padding:0;
+    }
+    
+    @backgroundcol: #ff6f5c;
+    @bordercol: #ff1e00;
+    @transpeed: 0.3s;
+
+    .btn {
+        display:inline-block;
+        padding:0 @btnhorzpadding;
+        line-height:@btnlineheight;
+        margin:0;
+        .border-box();
+        .border-radius( 0.5em );
+        border:0;
+        border-bottom:solid 5px @bordercol;
+		background:@backgroundcol;
+		.transition( all @transpeed );
+        color:#FFFFFF;
+        outline:0;
+        cursor:pointer;
+        text-align:center;
+        text-decoration:none;
+        font-size:@btnfontsize;
+        vertical-align:middle;
+        font-family:Arial,Helvetica;
+        font-weight:bold;
+        border-collapse:separate; //fix for IE9
+        overflow:visible; //fix for IE7
+
+        &.btn-small {
+            font-size:@btnfontsize * 0.9;
+            line-height:@btnlineheight / 1.2;
+            font-weight:normal;
+        }
+        &.btn-large {
+            font-size:@btnfontsize * 1.4;
+        }
+
+        &:hover {
+            background:lighten(@backgroundcol,10%);
+            border-color:lighten(@bordercol,20%);
+            text-decoration:none;
+        }
+        &.btn-block {
+            display:block;
+            width:100%;
+            text-align:left;
+            &.center {
+                text-align:center;
+            }
+        }
+
+        &.btn-primary {
+        }
+        &.btn-secondary {
+            color:#2a3189;
+        }
+        &[disabled],
+        &.disabled {
+			background:#a6a6a6;
+			border-color:#888888;
+            cursor:default;
+            &:hover {
+                //background:#DDD;
+            }
+        }
+    }

@@ -25,8 +25,6 @@ var lineSymbol = {
 var snowman = {
 	markercount: 0,
 	markers: [],
-	markerslinked: 0,
-	markerstotal: 0,
 	icon_no: 'img/marker-red.svg',
 	icon_ok: 'img/marker-green.svg',
 	lines: [],
@@ -53,6 +51,37 @@ var snowman = {
 	},
 
 	game: {
+		updateMarkersLinked: function(){
+			var markerslinked = snowman.pointsclicked.length - 1;
+			$('#markerslinked').html(markerslinked);
+			if(markerslinked == (snowman.markers.length - 1)){
+				snowman.game.manageGo(0);
+			}
+			else {
+				snowman.game.manageGo(1);
+			}
+		},
+		updateMarkersTotal: function(){
+			$('#markerstotal').html(snowman.markers.length - 1);
+		},
+		manageGo: function(disable){
+			if(disable){
+				$('#showbest').attr('disabled',true);
+			}
+			else {
+				$('#showbest').removeAttr('disabled');
+			}
+		},
+		//FIXME this is exactly the same as the function above
+		manageNext: function(disable){
+			if(disable){
+				$('#nextlevel').attr('disabled',true);
+			}
+			else {
+				$('#nextlevel').removeAttr('disabled');
+			}
+		},
+
 		//fill the dialog with text and show it
 		populateDialog: function(txt){
 			$('#dialog').html(txt)
@@ -71,6 +100,7 @@ var snowman = {
 			$('body').on('click','#showbest',function(e){
 				e.preventDefault();
 			    snowman.game.calculateSolution();
+			    snowman.game.manageNext(0);
 			});
 			$('body').on('click','#nextlevel',function(e){
 				e.preventDefault();
@@ -105,6 +135,9 @@ var snowman = {
 			snowman.map.generateLocations();
 			//add markers to map
 			snowman.map.addMarkers();
+			snowman.game.updateMarkersLinked();
+			snowman.game.updateMarkersTotal();
+			snowman.game.manageNext(1);
 			//console.log(snowman.markercount,snowman.markers.length,snowman.markers);
 		},
 
@@ -144,6 +177,7 @@ var snowman = {
 			});
 			snowman.flightPath.setMap(map);
 			document.getElementById('yourroute').innerHTML = snowman.flightPath.inKm() + 'km';
+			snowman.game.updateMarkersLinked();
 			//console.log("Distance travelled: ",snowman.flightPath.inKm());
 		},
 		//fairly simple - basically find the next nearest marker to where we started from
@@ -289,7 +323,7 @@ var lngmax = 180;
 
 
 
-var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn">Instructions</a></p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a></p>';
+var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a> <a href="#" class="btn btn-primary" id="" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
 
 
 $(document).ready(function(){
