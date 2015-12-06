@@ -32,6 +32,8 @@ var snowman = {
 	flightPath: 0,
 	solutionPoints: [0],
 	solutionFlightPath: 0,
+	staticgamelevel: 0,
+	gametype: '',
 
 	general: {
 		//set everything up
@@ -89,11 +91,12 @@ var snowman = {
 		},
 		initClickEvents: function(){
 			//start the game
-			$('body').on('click','#begingame',function(e){
+			$('body').on('click','.js-begin',function(e){
 				e.preventDefault();
 				$('#dialogwrap').fadeOut(function(){
 					$('#dialog').html('');
 				});
+				snowman.gametype = $(this).attr('data-type');
 				snowman.game.nextLevel();
 			});
 			//show calculated solution route
@@ -104,6 +107,7 @@ var snowman = {
 			});
 			$('body').on('click','#nextlevel',function(e){
 				e.preventDefault();
+				snowman.staticgamelevel += 1;
 				snowman.game.nextLevel();
 			});
 		},
@@ -200,7 +204,11 @@ var snowman = {
 				geodesic: true,
 				strokeColor: '#00FF00',
 				strokeOpacity: 0.5,
-				strokeWeight: 8
+				strokeWeight: 8,
+				icons: [{
+					icon: lineSymbol,
+					offset: '100%'
+				}]				
 			});
 			snowman.solutionFlightPath.setMap(map);
 			document.getElementById('bestroute').innerHTML = snowman.solutionFlightPath.inKm() + 'km';
@@ -273,10 +281,18 @@ var snowman = {
 			globalmapdata = [];
 			globalmapdata.length = 0;
 			globalmapdata.push(origin);
-			for(var g = 0; g < snowman.markercount; g++){
-				var randlat = Math.floor(Math.random() * (latmax * 2)) - latmax;
-				var randlng = Math.floor(Math.random() * (lngmax * 2)) - lngmax;
-				globalmapdata.push({"lat":randlat,"lng":randlng,"content": "here is " + randlat + ',' + randlng});
+			if(snowman.gametype == 'endless'){
+				for(var g = 0; g < snowman.markercount; g++){
+					var randlat = Math.floor(Math.random() * (latmax * 2)) - latmax;
+					var randlng = Math.floor(Math.random() * (lngmax * 2)) - lngmax;
+					globalmapdata.push({"lat":randlat,"lng":randlng,"content": "here is " + randlat + ',' + randlng});
+				}
+			}
+			else {
+				for(var g = 0; g < staticpoints[snowman.staticgamelevel].length; g++){
+					globalmapdata.push({"lat":staticpoints[snowman.staticgamelevel][g]["lat"],"lng":staticpoints[snowman.staticgamelevel][g]["lng"],"content": ''});
+				}
+
 			}
 		},
 		rad: function(x){
@@ -321,9 +337,41 @@ var bounds;
 var latmax = 58;
 var lngmax = 180;
 
+var staticpoints = [
+	[
+		{
+			"lat": 64.141904,
+			"lng": -21.927054,
+			"content": "Reykjavik",
+		},
+		{
+			"lat": 53.300318,
+			"lng": -60.308749,
+			"content": "Happy Valley Goose Bay",
+		},
+	],
+	[
+		{
+			"lat": 15.605748,
+			"lng": 32.508616,
+			"content": "Sudan National Museum",
+		},
+		{
+			"lat": 62.070968,
+			"lng": 130.992179,
+			"content": "",
+		},
+		{
+			"lat": 12.219770,
+			"lng": -1.751221,
+			"content": "",
+		},
+
+	],
+];
 
 
-var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network, or SNOWMAN.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn btn-primary" id="begingame">Begin</a> <a href="#" class="btn btn-primary" id="" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
+var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn btn-primary js-begin" data-type="arcade">Arcade mode</a> <a href="#" class="btn btn-primary js-begin" data-type="endless" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
 
 
 $(document).ready(function(){
