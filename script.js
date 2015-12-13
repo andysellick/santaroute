@@ -34,6 +34,8 @@ var snowman = {
 	solutionFlightPath: 0,
 	staticgamelevel: 0,
 	gametype: '',
+	yourscore: 0,
+	snowmanscore: 0,
 
 	general: {
 		//set everything up
@@ -42,7 +44,7 @@ var snowman = {
 			snowman.map.generateLocations();
 			snowman.map.generateMap();
 
-			snowman.game.populateDialog(introtxt);
+			snowman.game.populateDialog(introtxt + gametxt);
 			snowman.game.initClickEvents();
 		},
 		//initial setup - store the origin point
@@ -135,13 +137,39 @@ var snowman = {
 			}
 			snowman.markerslinked = 0;
 			snowman.markerstotal = 0;
-			snowman.general.initBasics();
-			snowman.map.generateLocations();
-			//add markers to map
-			snowman.map.addMarkers();
-			snowman.game.updateMarkersLinked();
-			snowman.game.updateMarkersTotal();
-			snowman.game.manageNext(1);
+
+			var continuegame = 0;
+			var nexttxt;
+			if(snowman.yourscore <= snowman.snowmanscore){
+				if(snowman.gametype == 'endless'){
+					continuegame = 1;
+				}
+				else {
+					if(snowman.staticgamelevel < staticpoints.length){
+						continuegame = 1;
+					}
+					else {
+						console.log('done');
+						nexttxt = '<h1>Arcade mode complete!</h1><p>Congratulations! You have completed initial training and unlocked ENDLESS MODE.</p>' + gametxt;
+						//now announce victory, localstorage to make endless available, trigger popup
+					}
+				}
+			}
+			else {
+				nexttxt = '<h1>Game over</h1><p>Sorry, but you failed to create a better route. Please try again.</p>';
+			}
+			if(continuegame){
+				snowman.general.initBasics();
+				snowman.map.generateLocations();
+				//add markers to map
+				snowman.map.addMarkers();
+				snowman.game.updateMarkersLinked();
+				snowman.game.updateMarkersTotal();
+				snowman.game.manageNext(1);
+			}
+			else {
+				snowman.game.populateDialog(nexttxt);
+			}
 			//console.log(snowman.markercount,snowman.markers.length,snowman.markers);
 		},
 
@@ -180,7 +208,8 @@ var snowman = {
 				}]
 			});
 			snowman.flightPath.setMap(map);
-			document.getElementById('yourroute').innerHTML = snowman.flightPath.inKm() + 'km';
+			snowman.yourscore = snowman.flightPath.inKm();
+			document.getElementById('yourroute').innerHTML = snowman.yourscore + 'km';
 			snowman.game.updateMarkersLinked();
 			//console.log("Distance travelled: ",snowman.flightPath.inKm());
 		},
@@ -211,7 +240,8 @@ var snowman = {
 				}]				
 			});
 			snowman.solutionFlightPath.setMap(map);
-			document.getElementById('bestroute').innerHTML = snowman.solutionFlightPath.inKm() + 'km';
+			snowman.snowmanscore = snowman.solutionFlightPath.inKm();
+			document.getElementById('bestroute').innerHTML = snowman.snowmanscore + 'km';
 			//console.log("Distance travelled: ",snowman.solutionFlightPath.inKm());
 		}
 
@@ -371,7 +401,8 @@ var staticpoints = [
 ];
 
 
-var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p><p><a href="#" class="btn btn-primary js-begin" data-type="arcade">Arcade mode</a> <a href="#" class="btn btn-primary js-begin" data-type="endless" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
+var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p>';
+var gametxt = '<p><a href="#" class="btn btn-primary js-begin" data-type="arcade">Arcade mode</a> <a href="#" class="btn btn-primary js-begin" data-type="endless" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
 
 
 $(document).ready(function(){
