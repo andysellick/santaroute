@@ -95,11 +95,13 @@ var snowman = {
 			//start the game
 			$('body').on('click','.js-begin',function(e){
 				e.preventDefault();
-				$('#dialogwrap').fadeOut(function(){
-					$('#dialog').html('');
-				});
-				snowman.gametype = $(this).attr('data-type');
-				snowman.game.nextLevel();
+				if($(this).attr('disabled') !== 'disabled'){
+					$('#dialogwrap').fadeOut(function(){
+						$('#dialog').html('');
+					});
+					snowman.gametype = $(this).attr('data-type');
+					snowman.game.nextLevel();
+				}
 			});
 			//show calculated solution route
 			$('body').on('click','#showbest',function(e){
@@ -209,7 +211,6 @@ var snowman = {
 			});
 			snowman.flightPath.setMap(map);
 			snowman.yourscore = snowman.flightPath.inKm();
-			document.getElementById('yourroute').innerHTML = snowman.yourscore + 'km';
 			snowman.game.updateMarkersLinked();
 			//console.log("Distance travelled: ",snowman.flightPath.inKm());
 		},
@@ -241,6 +242,7 @@ var snowman = {
 			});
 			snowman.solutionFlightPath.setMap(map);
 			snowman.snowmanscore = snowman.solutionFlightPath.inKm();
+			document.getElementById('yourroute').innerHTML = snowman.yourscore + 'km';
 			document.getElementById('bestroute').innerHTML = snowman.snowmanscore + 'km';
 			//console.log("Distance travelled: ",snowman.solutionFlightPath.inKm());
 		}
@@ -402,7 +404,7 @@ var staticpoints = [
 
 
 var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p>';
-var gametxt = '<p><a href="#" class="btn btn-primary js-begin" data-type="arcade">Arcade mode</a> <a href="#" class="btn btn-primary js-begin" data-type="endless" disabled>Endless mode</a></p><p><a href="#" class="btn">Instructions</a></p>';
+var gametxt = '<p><span class="btn btn-primary js-begin" data-type="arcade">Arcade mode</span> <span class="btn btn-primary js-begin" data-type="endless" disabled="disabled">Endless mode</span></p><p><span class="btn">Instructions</span></p>';
 
 
 $(document).ready(function(){

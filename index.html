@@ -7,15 +7,20 @@
 
 <body>
 	<div id="gmap" class="map"></div>
-	<div class="overlay controls">
-		<p><span id="markerslinked"></span> of <span id="markerstotal"></span> waypoints connected</p>
-		<button id="showbest" class="btn" disabled>Go!</button>
-		<button id="nextlevel" class="btn" disabled>Continue</button>
+	
+	<div class="overlay output">
 		<div id="routeresult" class="">
 			<p>Your route: <span id="yourroute" class="answer"></span></p>
 			<p>Best route: <span id="bestroute" class="answer"></span></p>
 		</div>
 	</div>
+
+	<div class="overlay controls">
+		<p><span id="markerslinked"></span> of <span id="markerstotal"></span> waypoints connected</p>
+		<button id="showbest" class="btn" disabled>Submit</button>
+		<button id="nextlevel" class="btn" disabled>Continue</button>
+	</div>
+
 	<div class="overlay score">
 		Score <span id="yourscore">0</span>
 	</div>
