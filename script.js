@@ -36,6 +36,10 @@ var snowman = {
 	gametype: '',
 	yourscore: 0,
 	snowmanscore: 0,
+	
+	clearlocal: function(){
+		localStorage.setItem('snowmangameendless', 0);
+	},
 
 	general: {
 		//set everything up
@@ -43,8 +47,10 @@ var snowman = {
 			snowman.general.initBasics();
 			snowman.map.generateLocations();
 			snowman.map.generateMap();
-
-			snowman.game.populateDialog(introtxt + gametxt);
+			if(localStorage.getItem('snowmangameendless') === 1){
+				gametxt = gametxt2;
+			}
+			snowman.game.showRegularDialog();
 			snowman.game.initClickEvents();
 		},
 		//initial setup - store the origin point
@@ -76,29 +82,25 @@ var snowman = {
 				$('#showbest').removeAttr('disabled');
 			}
 		},
-		//FIXME this is exactly the same as the function above
-		manageNext: function(disable){
-			if(disable){
-				$('#nextlevel').attr('disabled',true);
-			}
-			else {
-				$('#nextlevel').removeAttr('disabled');
-			}
-		},
-
 		//fill the dialog with text and show it
 		populateDialog: function(txt){
 			$('#dialog').html(txt)
 			$('#dialogwrap').fadeIn();
+		},
+		hideDialog: function(){
+			$('#dialogwrap').fadeOut(function(){
+				$('#dialog').html('');
+			});
+		},
+		showRegularDialog: function(){
+			snowman.game.populateDialog(introtxt + gametxt);
 		},
 		initClickEvents: function(){
 			//start the game
 			$('body').on('click','.js-begin',function(e){
 				e.preventDefault();
 				if($(this).attr('disabled') !== 'disabled'){
-					$('#dialogwrap').fadeOut(function(){
-						$('#dialog').html('');
-					});
+					snowman.game.hideDialog();
 					snowman.gametype = $(this).attr('data-type');
 					snowman.game.nextLevel();
 				}
@@ -107,18 +109,50 @@ var snowman = {
 			$('body').on('click','#showbest',function(e){
 				e.preventDefault();
 			    snowman.game.calculateSolution();
-			    snowman.game.manageNext(0);
+
+			    var yourroute = '<p>Your route: ' + snowman.yourscore + 'km</p>';
+			    var snowmanroute = '<p>Best route: ' + snowman.snowmanscore + 'km</p>';
+
+				console.log(snowman.staticgamelevel,staticpoints.length);
+				if(snowman.yourscore <= snowman.snowmanscore){
+					//you win
+					if(snowman.gametype === 'endless'){
+					    snowman.game.populateDialog('<h1>Well done</h1><p>Your route was at least as good as the one we\'d calculated.</p>' + yourroute + snowmanroute + nextleveltxt);
+					}
+					else {
+						if(snowman.staticgamelevel < staticpoints.length - 1){
+						    snowman.game.populateDialog('<h1>Well done</h1><p>Your route was at least as good as the one we\'d calculated.</p>' + yourroute + snowmanroute + nextleveltxt);
+						}
+						else {
+							//now announce victory, localstorage to make endless available, trigger popup
+							localStorage.setItem('snowmangameendless', 1);
+							gametxt = gametxt2;
+						    snowman.game.populateDialog(arcadecompletetxt + gametxt2);
+						}
+					}
+				}
+				else {
+					//you lose
+					snowman.staticgamelevel = 0;
+				    snowman.game.populateDialog(gameovertxt + yourroute + snowmanroute + gametxt);
+				}
+
 			});
 			$('body').on('click','#nextlevel',function(e){
 				e.preventDefault();
+				snowman.game.hideDialog();
 				snowman.staticgamelevel += 1;
 				snowman.game.nextLevel();
+			});
+			$('body').on('click','.js-instructions',function(e){
+				e.preventDefault();
+				snowman.game.showRegularDialog();
 			});
 		},
 
 		//reset all the markers, recreate and move to next level
 		nextLevel: function(){
-			//console.log('next level');
+			console.log('next level');
 			//clear all markers
 			snowman.map.removeMarkers();
 			snowman.markers = [];
@@ -140,6 +174,14 @@ var snowman = {
 			snowman.markerslinked = 0;
 			snowman.markerstotal = 0;
 
+			snowman.general.initBasics();
+			snowman.map.generateLocations();
+			//add markers to map
+			snowman.map.addMarkers();
+			snowman.game.updateMarkersLinked();
+			snowman.game.updateMarkersTotal();
+
+/*
 			var continuegame = 0;
 			var nexttxt;
 			if(snowman.yourscore <= snowman.snowmanscore){
@@ -151,27 +193,25 @@ var snowman = {
 						continuegame = 1;
 					}
 					else {
-						console.log('done');
-						nexttxt = '<h1>Arcade mode complete!</h1><p>Congratulations! You have completed initial training and unlocked ENDLESS MODE.</p>' + gametxt;
+						nexttxt = arcadecompletetxt + gametxt2;
 						//now announce victory, localstorage to make endless available, trigger popup
+						localStorage.setItem('snowmangameendless', 1);
+						gametxt = gametxt2;
 					}
 				}
 			}
 			else {
-				nexttxt = '<h1>Game over</h1><p>Sorry, but you failed to create a better route. Please try again.</p>';
+				nexttxt = gameovertxt + gametxt2;
 			}
-			if(continuegame){
-				snowman.general.initBasics();
-				snowman.map.generateLocations();
-				//add markers to map
-				snowman.map.addMarkers();
-				snowman.game.updateMarkersLinked();
-				snowman.game.updateMarkersTotal();
-				snowman.game.manageNext(1);
+*/
+			//if(continuegame){
+			//snowman.game.manageNext(1);
+			/*
 			}
 			else {
-				snowman.game.populateDialog(nexttxt);
+				//snowman.game.showRegularDialog();
 			}
+			*/
 			//console.log(snowman.markercount,snowman.markers.length,snowman.markers);
 		},
 
@@ -240,10 +280,11 @@ var snowman = {
 					offset: '100%'
 				}]				
 			});
-			snowman.solutionFlightPath.setMap(map);
+			//only show solution if in endless mode
+			if(snowman.gametype === 'endless'){
+				snowman.solutionFlightPath.setMap(map);
+			}
 			snowman.snowmanscore = snowman.solutionFlightPath.inKm();
-			document.getElementById('yourroute').innerHTML = snowman.yourscore + 'km';
-			document.getElementById('bestroute').innerHTML = snowman.snowmanscore + 'km';
 			//console.log("Distance travelled: ",snowman.solutionFlightPath.inKm());
 		}
 
@@ -313,7 +354,7 @@ var snowman = {
 			globalmapdata = [];
 			globalmapdata.length = 0;
 			globalmapdata.push(origin);
-			if(snowman.gametype == 'endless'){
+			if(snowman.gametype === 'endless'){
 				for(var g = 0; g < snowman.markercount; g++){
 					var randlat = Math.floor(Math.random() * (latmax * 2)) - latmax;
 					var randlng = Math.floor(Math.random() * (lngmax * 2)) - lngmax;
@@ -404,8 +445,12 @@ var staticpoints = [
 
 
 var introtxt = '<h1>Welcome willing volunteer!</h1><p>Thank you for agreeing to participate in this year\'s Sleigh Navigation Optimal Waypoint Method Advancement Network.</p><p>Santa thanks you for your involvement and hopes you will enjoy your time with us. With your help, this year\'s deliveries will be more efficient than ever!</p>';
-var gametxt = '<p><span class="btn btn-primary js-begin" data-type="arcade">Arcade mode</span> <span class="btn btn-primary js-begin" data-type="endless" disabled="disabled">Endless mode</span></p><p><span class="btn">Instructions</span></p>';
-
+var gametxt = '<p><span class="btn btn-primary js-begin" data-type="arcade">Arcade mode</span> <span class="btn btn-primary js-begin" data-type="endless" disabled="disabled">Endless mode</span></p><p><span class="btn js-instructions">Instructions</span></p>';
+var gametxt2 = '<p><span class="btn btn-primary js-begin" data-type="arcade">Arcade mode</span> <span class="btn btn-primary js-begin" data-type="endless">Endless mode</span></p><p><span class="btn js-instructions">Instructions</span></p>';
+var instructiontxt = '<h1>Instructions</h1><p>In recent years, Santa\'s deliveries have been increasingly inefficient. That\'s where you come in. Santa needs your help to improve his navigation around the globe.</p><p>Each map marker represents a hopeful young child waiting for a present. Starting from Santa HQ in Greenland, simply click on the map markers to form the shortest route possible - and Santa will be home before the sun rises.</p>';
+var gameovertxt = '<h1>Game over</h1><p>Sorry, but you failed to create a better route. Please try again.</p>';
+var arcadecompletetxt = '<h1>Arcade mode complete!</h1><p>Congratulations! You have completed initial training and unlocked ENDLESS MODE.</p>';
+var nextleveltxt = '<p><button id="nextlevel" class="btn">Continue</button></p>';
 
 $(document).ready(function(){
 	snowman.general.init();
