@@ -100,6 +100,7 @@ var snowman = {
 			$('body').on('click','.js-begin',function(e){
 				e.preventDefault();
 				if($(this).attr('disabled') !== 'disabled'){
+					snowman.markercount = 0;
 					snowman.game.hideDialog();
 					snowman.gametype = $(this).attr('data-type');
 					snowman.game.nextLevel();
@@ -152,7 +153,7 @@ var snowman = {
 
 		//reset all the markers, recreate and move to next level
 		nextLevel: function(){
-			console.log('next level');
+			//console.log('next level');
 			//clear all markers
 			snowman.map.removeMarkers();
 			snowman.markers = [];
