@@ -6,6 +6,18 @@
 @import "utility.less";
 @import "buttons.less";
 
+@transpeed: 0.4s;
+
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        font-family:Arial, Verdana, sans-serif;
+        font-size: 100%;
+        color:#333333;
+    }
 
 	html,
 	body {
@@ -13,6 +25,7 @@
 	}
 
 	.map {
+		z-index:1;
 		position:fixed;
 		top:0;
 		left:0;
@@ -21,22 +34,21 @@
 	}
 	.overlay {
 		position:fixed;
+		z-index:2;
 		padding:10px;
-		background:rgba(255,255,255,0.5);
+		background:rgba(255,255,255,0.8);
+		.transition( all @transpeed );
+		.box-shadow( 0 5px 10px rgba(0,0,0,0.5) );
+		text-align:center;
+		font-weight:bold;
 
-		&.output {
-			bottom:0;
-			left:0;
-			border:solid rgba(230,48,37,0.5) 4px;
-			border-left:0;
-			border-bottom:0;
-		}
 		&.controls {
 			bottom:0;
 			right:0;
 			border:solid rgba(230,48,37,0.5) 4px;
 			border-right:0;
 			border-bottom:0;
+			.border-radius( 10px 0 0 0 );
 		}
 		&.score {
 			top:0;
@@ -44,37 +56,63 @@
 			border:solid rgba(230,48,37,0.5) 4px;
 			border-top:0;
 			border-right:0;
+			.border-radius( 0 0 0 10px );
 		}
 	}
 
 	p {
 		margin:0;
-		padding:0 0 0.3em 0;
+		padding:0 0 0.75em 0;
 	}
 	.answer {
+		font-weight:bold;
+	}
+	.strong {
+		font-size:90%;
 		font-weight:bold;
 	}
 
 	
 	.dialogwrap {
+		.transparency( 0 );
+		z-index:0;
 		position:fixed;
 		top:0;
 		left:0;
 		width:100%;
 		height:100%;
-		background:rgb(255,255,255);
-		background:rgba(255,255,255,0.3);
+		background:none;
+		.transition( all @transpeed );
+		overflow-y:scroll;
 
 		.dialog {
 			width:80%;
-			max-width:500px;
-			margin:50px auto 0 auto;
+			max-width:620px;
+			margin:50px auto;
 			padding:40px;
 			.border-box();
-			background:#FFFFFF;
+			background:rgba(255,255,255,0.6);
+			border:solid rgba(230,48,37,0.5) 4px;
 			.border-radius( 10px );
 			.box-shadow( 0 5px 10px rgba(0,0,0,0.5) );
 			text-align:center;
+		}
+	}
+
+	.menushown {
+		.dialogwrap {
+			z-index:10;
+			.transparency( 1 );
+			background:rgb(255,255,255);
+			background:rgba(255,255,255,0.3);
+		}
+		.overlay {
+			&.controls {
+				.transform( translateY(100%) );
+			}
+			&.score {
+				.transform( translateY(-100%) );
+			}
 		}
 	}
 
